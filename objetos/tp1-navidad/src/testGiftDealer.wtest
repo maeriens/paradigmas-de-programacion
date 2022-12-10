@@ -1,0 +1,91 @@
+import personas.*
+import regalos.*
+import giftDealer.*
+
+describe "Test de Gift Dealer" {
+
+	const voucher = new Voucher()
+
+	test "Obtener a los que son inconformistas" {
+		assert.equals(#{ stefan }, giftDealer.obtenerInconformistas())
+	}
+
+	test "Para una persona que no le gusta ningún regalo, obtiene un voucher" {
+		giftDealer.regaloSiNoLeGustaNada(voucher)
+		assert.equals(voucher, giftDealer.mejorRegalo(stefan))
+	}
+
+	test "La elección de un regalo queda registrada en el histórico correctamente" {
+		giftDealer.agregarRegalo(voucher)
+		giftDealer.seleccionarRegalo(justina)
+		assert.equals(voucher, giftDealer.historicoDelDealer().registros().first().regalo())
+	}
+
+	test "En la elección de un regalo, la persona queda registrada en el correctamente" {
+		giftDealer.agregarRegalo(voucher)
+		giftDealer.seleccionarRegalo(justina)
+		assert.equals(justina, giftDealer.historicoDelDealer().registros().first().persona())
+	}
+
+	test "Para una persona que le gusta más de un regalo, se selecciona el más barato" {
+		// A justina le gustan los regalos valiosos. 
+		// El voucher es valioso, el yoyo ya lo tiene el giftDealer. El voucher es más barato
+		giftDealer.agregarRegalo(voucher)
+		giftDealer.metodoSeleccionDeRegalo(regaloMasBarato)
+		assert.equals(voucher, giftDealer.mejorRegalo(justina))
+	}
+
+	test "Con el método de regalo que no le gusta, una persona que no le gusta más de un regalo recibe el primero que no le gusta" {
+		// A justina le gustan los regalos valiosos. 
+		// El voucher es valioso y no debería elegirlo, el balero ni el yoyo son valiosos por defecto pero debería elegir el primero
+		giftDealer.listaDeRegalos([ voucher, balero, yoyo ])
+		giftDealer.metodoSeleccionDeRegalo(regaloQueNoLeGusta)
+		assert.equals(balero, giftDealer.mejorRegalo(justina))
+	}
+
+	test "Para una persona que le gusta más de un regalo, se selecciona regalo alzar sin importar la preferencia de la persona" {
+		const regaloAlAzarTest = object {
+			method seleccionRegalo(persona, dealer) = balero
+		}
+		giftDealer.metodoSeleccionDeRegalo(regaloAlAzarTest)
+		assert.equals(balero, giftDealer.mejorRegalo(justina))
+	}
+
+}
+
+describe "Tests de Histórico" {
+
+	// Una función de generar registro no ahorra mucho
+	method generarRegalo(precio) = object {
+		method precio() = precio
+	}
+
+	test "Al no haber registros, el set de personas en los registros es vacía" {
+		assert.equals(#{}, historico.personasEnRegistros())
+	}
+
+	test "Al tener un sólo registro en el histórico debe haber una sola persona en los registros" {
+		const registro = new Registro(persona = stefan, regalo = yoyo)
+		historico.agregarRegistro(registro)
+		assert.equals(#{ stefan }, historico.personasEnRegistros())
+	}
+
+	test "Dados multiples registros de una persona, puedo obtener el total recibido" {
+		const persona = stefan
+		const registroYoyo = new Registro(persona = persona, regalo = yoyo)
+		const registroBalero = new Registro(persona = persona, regalo = balero)
+		historico.registros([ registroYoyo, registroBalero ])
+		assert.equals(yoyo.precio() + balero.precio(), historico.totalDeUnaPersona(persona))
+	}
+
+	test "Dados multiples registros de varias personas, puedo obtener el nombre de quien recibió más plata en regalos" {
+		const registroBaratoPedro = new Registro(persona = pedro, regalo = self.generarRegalo(5000))
+		const registroBaratoStefan = new Registro(persona = stefan, regalo = self.generarRegalo(2000))
+		const registroCaroStefan = new Registro(persona = stefan, regalo = self.generarRegalo(15000))
+		const registroCaroPedro = new Registro(persona = pedro, regalo = self.generarRegalo(13000))
+		historico.registros([ registroBaratoPedro, registroBaratoStefan, registroCaroPedro, registroCaroStefan ])
+		assert.equals(pedro, historico.personaQueMasPlataRecibio())
+	}
+
+}
+

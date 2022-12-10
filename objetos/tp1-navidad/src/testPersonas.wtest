@@ -1,0 +1,167 @@
+import personas.*
+import regalos.*
+
+class RegaloTesteable {
+
+	const property precio
+	const property esRegaloValioso = false
+	const property esInteresante = true
+
+}
+
+describe "Tests de Stefan" {
+
+	test "Elije un regalo que es interesante y elije" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = false, esInteresante = true)
+		assert.that(stefan.elegirRegalo(regalo))
+	}
+
+	test "No elije un regalo que no es interesante, aunque cumpla su criterio" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = false, esInteresante = false)
+		assert.notThat(stefan.elegirRegalo(regalo))
+	}
+
+	test "No elije un regalo que es interesante pero no cumple su criterio" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = true, esInteresante = true)
+		assert.notThat(stefan.elegirRegalo(regalo))
+	}
+
+}
+
+describe "Tests de Justina" {
+
+	test "Regalo que elije en base a edad impar y regalo valioso" {
+		pistaScalextric.agregarAutos(1)
+		assert.that(justina.elegirRegalo(pistaScalextric))
+	}
+
+	test "Regalo que no elije en base a edad impar y regalo no valioso" {
+		assert.notThat(justina.elegirRegalo(pistaScalextric))
+	}
+
+	test "Regalo que no elije en base a edad par y precio del regalo" {
+		justina.cambiarEdad(12)
+		assert.notThat(justina.elegirRegalo(pistaScalextric))
+	}
+
+	test "Regalo que elije en base a edad par y precio del regalo" {
+		justina.cambiarEdad(12)
+		assert.that(justina.elegirRegalo(yoyo))
+	}
+
+	test "Elije un regalo que es interesante y cumple sus requisitos" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = true, esInteresante = true)
+		assert.that(justina.elegirRegalo(regalo))
+	}
+
+	test "No elije un regalo que no es interesante, aunque cumpla sus requisitos" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = false, esInteresante = false)
+		assert.notThat(justina.elegirRegalo(regalo))
+	}
+
+	test "No elije un regalo que es interesante pero no cumple sus requisitos" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = false, esInteresante = true)
+		assert.notThat(justina.elegirRegalo(regalo))
+	}
+
+}
+
+describe "Tests de Pedro" {
+
+	test "Elije el mismo regalo que su mejor amigo" {
+		pistaScalextric.agregarAutos(1)
+		assert.that(pedro.elegirRegalo(pistaScalextric))
+	}
+
+	test "Elije el mismo regalo un nuevo mejor amigo" {
+		pedro.cambiarMejorAmigue(stefan)
+		yoyo.pintarDe("verde")
+		assert.that(pedro.elegirRegalo(yoyo))
+	}
+
+	test "Elije un regalo que para su mejor amigue es interesante y además elige" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = true, esInteresante = true)
+		assert.that(pedro.elegirRegalo(regalo))
+	}
+
+	test "No elije un regalo que para su mejor amigue no es interesante, aunque lo elija" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = false, esInteresante = false)
+		assert.notThat(pedro.elegirRegalo(regalo))
+	}
+
+	test "No elije un regalo que para su mejor amigue es interesante pero no elige" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = false, esInteresante = true)
+		assert.notThat(pedro.elegirRegalo(regalo))
+	}
+
+}
+
+// TP 2
+describe "Tests de Nazarena" {
+
+	// https://imgs.xkcd.com/comics/random_number.png
+	method asignarNumero(persona, numero) {
+		const stubNumerador = object {
+			method randomDeHasta(desde, hasta) = numero
+		}
+		persona.numerador(stubNumerador)
+	}
+
+	test "Elije un regalo que es interesante y además elige" {
+		self.asignarNumero(nazarena, 5)
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = true, esInteresante = true)
+		assert.that(nazarena.elegirRegalo(regalo))
+	}
+
+	test "Elije un regalo que no es interesante, aunque lo elija" {
+		self.asignarNumero(nazarena, 5)
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = false, esInteresante = false)
+		assert.notThat(nazarena.elegirRegalo(regalo))
+	}
+
+	test "Elije un regalo que es interesante pero no elige" {
+		self.asignarNumero(nazarena, 3)
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = false, esInteresante = true)
+		assert.notThat(nazarena.elegirRegalo(regalo))
+	}
+
+}
+
+describe "Tests de Persona Genérica" {
+
+	const personaGrande = new Persona(nombre = "Lionel", fechaDeNacimiento = new Date(year = 1987, month = 6, day = 24))
+	const personaJoven = new Persona(nombre = "Paulo", fechaDeNacimiento = new Date(year = 1993, month = 11, day = 15))
+
+	test "Persona grande elije un regalo que es interesante y supera su precio base" {
+		const regalo = new RegaloTesteable(precio = 25001, esRegaloValioso = true, esInteresante = true)
+		assert.that(personaGrande.elegirRegalo(regalo))
+	}
+
+	test "Persona grande no elije un regalo que no es interesante, aunque  supere su precio base" {
+		const regalo = new RegaloTesteable(precio = 25001, esRegaloValioso = false, esInteresante = false)
+		assert.notThat(personaGrande.elegirRegalo(regalo))
+	}
+
+	test "Persona grande no elije un regalo que es interesante pero no supera su precio base" {
+		const regalo = new RegaloTesteable(precio = 1000, esRegaloValioso = false, esInteresante = true)
+		assert.notThat(personaGrande.elegirRegalo(regalo))
+	}
+
+	// PERSONA JOVEN
+	test "Persona jóven le elige un regalo que es interesante y no supera su precio techo" {
+		const regalo = new RegaloTesteable(precio = 1, esRegaloValioso = true, esInteresante = true)
+		assert.that(personaJoven.elegirRegalo(regalo))
+	}
+
+	test "Persona jóven no elije un regalo que no es interesante, aunque no supere su precio techo" {
+		const regalo = new RegaloTesteable(precio = 1, esRegaloValioso = false, esInteresante = false)
+		assert.notThat(personaJoven.elegirRegalo(regalo))
+	}
+
+	test "Persona jóven no elije un regalo que es interesante supera su precio techo" {
+		const regalo = new RegaloTesteable(precio = 50001, esRegaloValioso = false, esInteresante = true)
+		assert.notThat(personaJoven.elegirRegalo(regalo))
+	}
+
+}
+

@@ -78,7 +78,3 @@ Las fusiones entre gemas no están limitadas a sólo dos de ellas, también pued
 ## Requerimientos
 
 Los integrantes deben ponerse de acuerdo para implementar en Haskell cada uno de los puntos y el testeo unitario que involucra la definición de las clases de equivalencia correspondientes.
-
-## Fecha y forma de entrega
-
-Miércoles 22/06 18:00 hs. presencial. Si no podés asistir tenés que pasarnos un comprobante que justifique tu ausencia.

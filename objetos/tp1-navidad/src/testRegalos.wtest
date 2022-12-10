@@ -1,0 +1,201 @@
+import regalos.*
+
+const marcaPar = "Pa"
+
+const marcaImpar = "P"
+
+describe "Tests de Pista de Scalextric" {
+
+	test "Costo base de la pista sin autos extra" {
+		assert.equals(27300, pistaScalextric.precio())
+	}
+
+	test "Costo con autos extra" {
+		pistaScalextric.agregarAutos(3)
+		assert.equals(43050, pistaScalextric.precio())
+	}
+
+	test "Pista de Scalextric sin autos extra no es valioso" {
+		assert.notThat(pistaScalextric.esRegaloValioso())
+	}
+
+	test "Pista de Scalextric con autos extra es valioso" {
+		pistaScalextric.agregarAutos(1)
+		assert.that(pistaScalextric.esRegaloValioso())
+	}
+
+	test "Pista de Scalextric es interesante si es valiosa y tiene marca de largo par" {
+		pistaScalextric.marca(marcaPar)
+		pistaScalextric.agregarAutos(1)
+		assert.that(pistaScalextric.esInteresante())
+	}
+
+	test "Pista de Scalextric no es interesante si la marca no tiene largo par" {
+		pistaScalextric.marca(marcaImpar)
+		pistaScalextric.agregarAutos(1)
+		assert.notThat(pistaScalextric.esInteresante())
+	}
+
+}
+
+describe "Tests de Yo-yo" {
+
+	const colorInteresante = 'azul'
+	const colorNoInteresante = 'rojo'
+
+	test "Costo de yo-yo pintado de color barato" {
+		yoyo.pintarDe("amarillo")
+		assert.equals(5000, yoyo.precio())
+	}
+
+	test "Costo del yo-yo sin caro" {
+		yoyo.pintarDe("azul")
+		assert.equals(6500, yoyo.precio())
+	}
+
+	test "Valor del yo-yo de color valioso" {
+		yoyo.pintarDe("azul")
+		assert.that(yoyo.esRegaloValioso())
+	}
+
+	test "Valor de yo-yo pintado de color no valioso" {
+		yoyo.pintarDe("rojo")
+		assert.notThat(yoyo.esRegaloValioso())
+	}
+
+	test "yo-yo con color interesante y marca par es interesante" {
+		yoyo.pintarDe(colorInteresante)
+		yoyo.marca(marcaPar)
+		assert.that(yoyo.esInteresante())
+	}
+
+	test "yo-yo de color no interesante no es interesante" {
+		yoyo.pintarDe(colorNoInteresante)
+		yoyo.marca(marcaPar)
+		assert.notThat(yoyo.esInteresante())
+	}
+
+	test "yo-yo con color interesante y marca impar no es interesante" {
+		yoyo.pintarDe(colorInteresante)
+		yoyo.marca(marcaImpar)
+		assert.notThat(yoyo.esInteresante())
+	}
+
+}
+
+describe "Tests de Balero" {
+
+	test "Precio del balero sin adorno" {
+		assert.equals(14100, balero.precio())
+	}
+
+	test "Precio del balero con adorno" {
+		balero.tieneAdornoMetalico(true)
+		assert.equals(16000, balero.precio())
+	}
+
+	test "Valor del balero sin adornos" {
+		assert.notThat(balero.esRegaloValioso())
+	}
+
+	test "Valor del balero con adornos" {
+		balero.tieneAdornoMetalico(true)
+		assert.that(balero.esRegaloValioso())
+	}
+
+	test "Es interesante si es caro y tiene marca par" {
+		balero.tieneAdornoMetalico(true)
+		balero.marca(marcaPar)
+		assert.that(balero.esInteresante())
+	}
+
+	test "No es interesante si no es caro" {
+		balero.tieneAdornoMetalico(false)
+		balero.marca(marcaImpar)
+		assert.notThat(balero.esInteresante())
+	}
+
+}
+
+describe "Tests de Ropa" {
+
+	// Messi Messi Messi Messi Messi
+	const fechaLiquidacion = new Date(year = 1987, month = 6, day = 24)
+	const marcaCaraPar = "Jordache"
+	const marcaBarata = "Mike"
+	const precioBase = 5000
+	// Las puedo hacer property y preguntarlas en el test pero suena a "assert que salís lo que salís"
+	const precioExtra = 25000
+	const porcentajeTotalAPagar = 0.8
+
+	method generarPrenda(marca, fecha) = new Ropa(marca = marca, fechaDeConfeccion = fecha, precioBase = precioBase, precioExtraMarcaCara = precioExtra)
+
+	test "La ropa que no es de marca cara que no está en liquidación paga el precio base" {
+		const remera = self.generarPrenda(marcaBarata, new Date())
+		assert.equals(precioBase, remera.precio())
+	}
+
+	test "La ropa que no es de marca cara que está en liquidación paga el precio con descuento" {
+		const remera = self.generarPrenda(marcaBarata, fechaLiquidacion)
+		assert.equals(precioBase * porcentajeTotalAPagar, remera.precio())
+	}
+
+	test "La ropa de marca cara que no está en liquidación paga el precio con extra" {
+		const remera = self.generarPrenda(marcaCaraPar, new Date())
+		assert.equals(precioBase + precioExtra, remera.precio())
+	}
+
+	test "La ropa que de marca cara que está en liquidación paga el precio con descuento" {
+		const remera = self.generarPrenda(marcaCaraPar, fechaLiquidacion)
+		assert.equals((precioBase + precioExtra) * porcentajeTotalAPagar, remera.precio())
+	}
+
+	test "La ropa cuya diferencia entre costo y precio base " {
+		const remera = self.generarPrenda(marcaCaraPar, fechaLiquidacion)
+		assert.equals((precioBase + precioExtra) * porcentajeTotalAPagar, remera.precio())
+	}
+
+	test "Ropa es interesante si tiene marca de largo par y cumple criterio interesante" {
+		const ropa = self.generarPrenda(marcaPar, new Date())
+		assert.that(ropa.esInteresante())
+	}
+
+	test "Ropa no es interesante si tiene marca de largo impar aunque cumpla criterio interesante" {
+		const ropa = self.generarPrenda(marcaImpar, new Date())
+		assert.notThat(ropa.esInteresante())
+	}
+
+	test "Ropa no es interesante si tiene marca de largo par pero no cumple criterio interesante" {
+		const ropa = self.generarPrenda(marcaCaraPar, new Date())
+		assert.notThat(ropa.esInteresante())
+	}
+
+}
+
+describe "Tests de Voucher" {
+
+	const voucher = new Voucher()
+
+	test "Un voucher es valioso siempre" {
+		assert.that(voucher.esRegaloValioso())
+	}
+
+	test "Es interesante si no está vencido y tiene marca de largo par" {
+		voucher.marca(marcaPar)
+		voucher.fechaDeVencimiento((new Date()).plusMonths(3))
+		assert.that(voucher.esInteresante())
+	}
+
+	test "No es interesante si está vencido, aunque tenga marca de largo par" {
+		voucher.marca(marcaPar)
+		voucher.fechaDeVencimiento((new Date()).minusMonths(3))
+		assert.notThat(voucher.esInteresante())
+	}
+
+	test "No es interesante si si la marca tiene largo impar" {
+		voucher.marca(marcaImpar)
+		assert.notThat(voucher.esInteresante())
+	}
+
+}
+
