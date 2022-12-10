@@ -1,0 +1,38 @@
+import personas.*
+import planDeVacunacion.*
+import vacunas.*
+
+describe "Tests de costo de plan de vacunacion" {
+
+	const personaCualquierosa = new Persona(nombre = "Messi", edad = 34, anticuerpos = 30000, inmunidadHasta = new Date(), ubicacion = "Rosario", eleccionDeVacunas = cualquierosa)
+	const personaAnticuerposa = new Persona(nombre = "Messi", edad = 34, anticuerpos = 30000, inmunidadHasta = new Date(), ubicacion = "Rosario", eleccionDeVacunas = anticuerposa)
+	const personaInmuVariable = new Persona(nombre = "Messi", edad = 34, anticuerpos = 30000, inmunidadHasta = new Date(), ubicacion = "Rosario", eleccionDeVacunas = new InmunidosaVariable(mesesDeInmunidad = 100))
+
+	test "Costo cuando hay una sola vacuna que la persona elije es el de la vacuna" {
+		planDeVacunacion.agregarPersona(personaCualquierosa)
+		planDeVacunacion.vacunas(#{ paifer })
+		assert.equals(paifer.calcularCosto(personaCualquierosa), planDeVacunacion.costoDelPlan())
+	}
+
+	test "Costo para una persona anticuerposa con más de una eleccion es el de la vacuna más barata" {
+		planDeVacunacion.agregarPersona(personaAnticuerposa)
+		// Elige tanto la Larusa 5 ($1700) como la Paifer $(1300)
+		assert.equals(1300, planDeVacunacion.costoDelPlan())
+	}
+
+	test "En caso de que no le guste ninguna vacuna, no se la considera y el costo es 0" {
+		planDeVacunacion.agregarPersona(personaInmuVariable)
+		assert.equals(0, planDeVacunacion.costoDelPlan())
+	}
+
+	test "El costo de un plan de vacunación es la suma de los costos de vacunación individuales de las personas" {
+		planDeVacunacion.agregarPersona(personaCualquierosa)
+		planDeVacunacion.agregarPersona(personaAnticuerposa)
+		planDeVacunacion.agregarPersona(personaInmuVariable)
+		const costoVacunaCualquierosa = planDeVacunacion.costoVacunaMasBarataQueElige(personaCualquierosa)
+		const costoVacunaAnticuerposa = planDeVacunacion.costoVacunaMasBarataQueElige(personaAnticuerposa)
+		assert.equals(costoVacunaCualquierosa + costoVacunaAnticuerposa, planDeVacunacion.costoDelPlan())
+	}
+
+}
+

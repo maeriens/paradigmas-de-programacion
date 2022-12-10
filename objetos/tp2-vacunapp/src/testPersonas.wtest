@@ -1,0 +1,72 @@
+import personas.*
+import vacunas.*
+
+describe "Tests de Personas" {
+
+	const anticuerposOriginales = 30000
+	const persona = new Persona(nombre = "Messi", edad = 34, anticuerpos = anticuerposOriginales, inmunidadHasta = new Date(), ubicacion = "Rosario", eleccionDeVacunas = cualquierosa)
+
+	test "Persona con preferencia cualquierosa acepta cualquier vacuna" {
+		assert.that(persona.aceptaVacuna(paifer))
+	}
+
+	test "Persona con preferencia anticuerposa acepta una vacuna si cumple su requisito" {
+		persona.eleccionDeVacunas(anticuerposa)
+		assert.that(persona.aceptaVacuna(paifer)) // multiplica por 10
+	}
+
+	test "Persona con preferencia anticuerposa no acepta una vacuna si no cumple su requisito" {
+		persona.eleccionDeVacunas(anticuerposa)
+		assert.notThat(persona.aceptaVacuna(astraLaVistaZeneca)) // suma 10000
+	}
+
+	test "Persona con preferencia inmunidosaFija acepta una vacuna si cumple su requisito" {
+		persona.eleccionDeVacunas(inmunidosaFija)
+		assert.that(persona.aceptaVacuna(paifer)) // Vence después de la fecha
+	}
+
+	test "Persona con preferencia inmunidosaFija no acepta una vacuna si no cumple su requisito" {
+		persona.eleccionDeVacunas(inmunidosaFija)
+		assert.notThat(persona.aceptaVacuna(new Larussa(multiplicador = 1))) // Vence antes de la fecha
+	}
+
+	test "Persona con preferencia inmunidosaVariable acepta una vacuna si cumple su requisito" {
+		const vacunaVenceEnTresMeses = object {
+			method calcularFechaInmunidad(persona) = new Date().plusMonths(3)
+		}
+		persona.eleccionDeVacunas(new InmunidosaVariable(mesesDeInmunidad = 1))
+		assert.that(persona.aceptaVacuna(vacunaVenceEnTresMeses)) // Vence después de la fecha
+	}
+
+	test "Persona con preferencia inmunidosaVariable no acepta una vacuna si no cumple su requisito" {
+		const vacunaVenceEnUnMes = object {
+			method calcularFechaInmunidad(persona) = new Date().plusMonths(1)
+		}
+		persona.eleccionDeVacunas(new InmunidosaVariable(mesesDeInmunidad = 3))
+		assert.notThat(persona.aceptaVacuna(vacunaVenceEnUnMes)) // Vence después de la fecha
+	}
+
+	test "Persona que acepta turno debe agregarla a su historial" {
+		persona.aceptaTurno(paifer)
+		assert.equals(paifer, persona.historialDeVacunas().last())
+	}
+
+	test "Persona que acepta turno debe tener los anticuerpos correspondientes" {
+		persona.aceptaTurno(paifer)
+		assert.equals(anticuerposOriginales * 10, persona.anticuerpos())
+	}
+
+	test "Persona que acepta turno debe tener la fecha de inmunización correspondiente" {
+		persona.aceptaTurno(paifer)
+		const fechaInmunizacionEsperada = (new Date()).plusMonths(9)
+		assert.equals(fechaInmunizacionEsperada, persona.inmunidadHasta())
+	}
+
+	test "Persona que no acepta turno debe dar mensaje diciendo que no lo hizo y no se le agrega la vacuna" {
+		persona.eleccionDeVacunas(anticuerposa)
+		assert.throwsExceptionWithMessage(mensajeSiNoElijeVacuna, { persona.aceptaTurno(astraLaVistaZeneca)})
+		assert.equals(0, persona.historialDeVacunas().size())
+	}
+
+}
+

@@ -1,0 +1,157 @@
+import vacunas.*
+import personas.*
+
+const personaAnticuerpos = object {
+	var property anticuerpos = 100
+	var property edad = 29
+}
+
+describe "Tests de Paifer" {
+
+	const personaMayor = object {
+		const property edad = 50
+	}
+	const personaMenor = object {
+		const property edad = 17
+	}
+
+	test "El aumento de anticuerpos es correcto" {
+		assert.equals(100 * 10, paifer.calcularAumentoAnticuerpos(personaAnticuerpos))
+	}
+
+	test "La fecha de inmunización para un mayor es correcta" {
+		const enSeisMeses = (new Date()).plusMonths(6)
+		assert.equals(enSeisMeses, paifer.calcularFechaInmunidad(personaMayor))
+	}
+
+	test "La fecha de inmunización para un menor es correcta" {
+		const enNueveMeses = (new Date()).plusMonths(9)
+		assert.equals(enNueveMeses, paifer.calcularFechaInmunidad(personaMenor))
+	}
+
+	test "El costo para una persona mayor es correcto" {
+		const costoBasePorEdad = paifer.costoBase(personaMayor)
+		assert.equals(costoBasePorEdad + 100, paifer.calcularCosto(personaMayor))
+	}
+
+	test "El costo para una persona menor es correcto" {
+		const costoBasePorEdad = paifer.costoBase(personaMenor)
+		assert.equals(costoBasePorEdad + 400, paifer.calcularCosto(personaMenor))
+	}
+
+}
+
+describe "Tests de Larussa" {
+
+	const larussa2 = new Larussa(multiplicador = 2)
+	const larussa5 = new Larussa(multiplicador = 5)
+	const larussa100 = new Larussa(multiplicador = 100)
+	const fechaInmunidad = new Date(year = 2022, month = 3, day = 3)
+
+	test "El aumento de anticuerpos es correcto" {
+		assert.equals(100 * 2, larussa2.calcularAumentoAnticuerpos(personaAnticuerpos))
+	}
+
+	test "El aumento de anticuerpos con otro multiplicador también es correcto" {
+		assert.equals(100 * 5, larussa5.calcularAumentoAnticuerpos(personaAnticuerpos))
+	}
+
+	test "El aumento de anticuerpos no supera al máximo multiplicador" {
+		assert.equals(100 * 20, larussa100.calcularAumentoAnticuerpos(personaAnticuerpos))
+	}
+
+	test "La fecha de inmunización es correcta" {
+		assert.equals(fechaInmunidad, larussa2.calcularFechaInmunidad(personaAnticuerpos))
+	}
+
+	test "La fecha de inmunización con otro multiplicado también es correcta" {
+		assert.equals(fechaInmunidad, larussa5.calcularFechaInmunidad(personaAnticuerpos))
+	}
+
+	test "El costo es correcto" {
+		const costoBase = paifer.costoBase(personaAnticuerpos)
+		assert.equals(costoBase + (100 * 2), larussa2.calcularCosto(personaAnticuerpos))
+	}
+
+	test "El costo con otra cantidad de componentes es correcto" {
+		const costoBase = paifer.costoBase(personaAnticuerpos)
+		assert.equals(costoBase + (100 * 5), larussa5.calcularCosto(personaAnticuerpos))
+	}
+
+}
+
+describe "Tests de AstraLaVistaZeneca" {
+
+	test "El aumento de anticuerpos es correcto" {
+		assert.equals(10100, astraLaVistaZeneca.calcularAumentoAnticuerpos(personaAnticuerpos))
+	}
+
+	test "La fecha de inmunización para una persona con nombre par es correcta" {
+		const personaNombrePar = object {
+			const property nombre = "Pa"
+		}
+		const enSeisMeses = (new Date()).plusMonths(6)
+		assert.equals(enSeisMeses, astraLaVistaZeneca.calcularFechaInmunidad(personaNombrePar))
+	}
+
+	test "La fecha de inmunización para una persona con nombre impar es correcta" {
+		const personaNombreImpar = object {
+			const property nombre = "P"
+		}
+		const enSieteMeses = (new Date()).plusMonths(7)
+		assert.equals(enSieteMeses, astraLaVistaZeneca.calcularFechaInmunidad(personaNombreImpar))
+	}
+
+	test "El costo para una persona especial es correcto" {
+		const personaEzpezial = object {
+			var property edad = 18
+			method esEspecial() = true
+		}
+		const costoBase = astraLaVistaZeneca.costoBase(personaEzpezial)
+		assert.equals(costoBase + 2000, astraLaVistaZeneca.calcularCosto(personaEzpezial))
+	}
+
+	test "El costo para una persona no especial es correcto" {
+		const perzonaComun = object {
+			var property edad = 18
+			method esEspecial() = false
+		}
+		const costoBase = astraLaVistaZeneca.costoBase(perzonaComun)
+		assert.equals(costoBase, astraLaVistaZeneca.calcularCosto(perzonaComun))
+	}
+
+}
+
+describe "Tests de Combineta" {
+
+	const personaCombineta = object {
+		var property anticuerpos = 100
+		var property edad = 20
+	}
+	const larussa2 = new Larussa(multiplicador = 2)
+	const combineta = new Combineta(dosis = #{ paifer, larussa2 })
+
+	test "El aumento de anticuerpos es correcto" {
+		const aumentoPaifer = paifer.calcularAumentoAnticuerpos(personaCombineta)
+		const aumentoLarussa = larussa2.calcularAumentoAnticuerpos(personaCombineta)
+		const minimoAumento = [ aumentoPaifer, aumentoLarussa ].min()
+		assert.equals(minimoAumento, combineta.calcularAumentoAnticuerpos(personaCombineta))
+	}
+
+	test "La fecha de inmunización es la mayor de las que ofrecen las dosis" {
+		const fechaPaifer = paifer.calcularFechaInmunidad(personaCombineta)
+		const fechaLarussa = larussa2.calcularFechaInmunidad(personaCombineta)
+		const maximaFecha = [ fechaPaifer, fechaLarussa ].max()
+		assert.equals(maximaFecha, combineta.calcularFechaInmunidad(personaCombineta))
+	}
+
+	test "El costo es correcto" {
+		const costoPaifer = paifer.calcularCosto(personaCombineta)
+		const costoLarusa = larussa2.calcularCosto(personaCombineta)
+		const costoExtra = 100 * 2 // 100 * cant vacunas
+		const total = costoLarusa + costoPaifer + costoExtra
+		assert.equals(total, combineta.calcularCosto(personaCombineta))
+	}
+
+}
+
