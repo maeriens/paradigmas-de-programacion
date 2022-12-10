@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "tp-gemas-cristal-base:lib"
+
+    - path: "./test"
+      component: "tp-gemas-cristal-base:test:tp-gemas-cristal-base-test"
