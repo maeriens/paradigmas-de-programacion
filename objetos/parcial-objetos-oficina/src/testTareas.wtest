@@ -1,0 +1,47 @@
+import tareas.*
+import personas.*
+import recompensas.*
+
+const hoy = new Date()
+
+describe "Tests de Tareas" {
+
+	const nuevaTarea = new Tarea(descripcion = "Test", duracionEstimada = 10, duracionFinal = 90, esAlExterior = true, fechaLimite = hoy)
+
+	test "Una tarea no esta finalizada" {
+		assert.notThat(nuevaTarea.estaFinalizada())
+	}
+
+	test "Una tarea puede ser finalizada" {
+		nuevaTarea.finalizar()
+		assert.that(nuevaTarea.estaFinalizada())
+	}
+
+	test "No puedo asignar a la tarea una persona que no le gusta dicha tarea" {
+		nuevaTarea.esAlExterior(false)
+		assert.throwsExceptionWithMessage("A la persona no le gusta hacer esta tarea, no puede ser agregada", { nuevaTarea.agregarParticipante(jim)})
+	}
+
+	test "No puedo asignar a la tarea una persona que no da puntaje" {
+		nuevaTarea.esAlExterior(true)
+		// La tarea sin nada no da puntos
+		assert.throwsExceptionWithMessage("La tarea no ofrece puntos de recompensa, no puede agregarsele una persona", { nuevaTarea.agregarParticipante(jim)})
+	}
+
+	test "No puedo asignar a la tarea cuando esta finalizada" {
+		nuevaTarea.esAlExterior(true)
+		nuevaTarea.agregarRecompensa(queSeaAfuera)
+		nuevaTarea.finalizar()
+		// La tarea sin nada no da puntos
+		assert.throwsExceptionWithMessage("No se pueden agregar personas a tareas finalizadas", { nuevaTarea.agregarParticipante(jim)})
+	}
+
+	test "Puedo agregar una persona a una tarea" {
+		nuevaTarea.esAlExterior(true)
+		nuevaTarea.agregarRecompensa(queSeaAfuera)
+		nuevaTarea.agregarParticipante(jim)
+		assert.equals(#{ jim }, nuevaTarea.participantes())
+	}
+
+}
+

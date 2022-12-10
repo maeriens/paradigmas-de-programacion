@@ -1,0 +1,68 @@
+import personas.*
+import tareas.*
+import recompensas.*
+
+describe "Tests de Personas" {
+
+	const michael = new Persona(nombre = "Michael")
+	const equipo = new Equipo(coordinador = michael)
+
+	test "A jim le gusta una tarea si cumple su requisito" {
+		const tareaAfuera = object {
+			method esAlExterior() = true
+			method esCorta() = true
+		}
+		assert.that(jim.leGustaHacerLaTarea(tareaAfuera))
+	}
+
+	test "A pam le gusta una tarea si cumple su requisito" {
+		const tareaConJim = object {
+			var property participantes = #{ jim }
+			method esCorta() = true
+		}
+		assert.that(pam.leGustaHacerLaTarea(tareaConJim))
+	}
+
+	test "A dwight le gusta una tarea si cumple su requisito" {
+		const tarea = object {
+			method calcularPuntosDeRecompensa() = 101
+			method esCorta() = true
+		}
+		assert.that(dwight.leGustaHacerLaTarea(tarea))
+	}
+
+	test "A una persona generica le gusta una tarea si cumple su requisito" {
+		const tarea = object {
+			var property participantes = #{ jim, dwight, pam, michael }
+			method esCorta() = true
+		}
+		assert.that(michael.leGustaHacerLaTarea(tarea))
+	}
+
+	test "A un equipo le gusta una tarea que le guste a todos" {
+		equipo.involucrados(#{ jim, dwight, pam, michael })
+		const superTarea = object {
+			var property participantes = #{ jim, dwight, pam, michael }
+			method esCorta() = true
+			method calcularPuntosDeRecompensa() = 101
+			method esAlExterior() = true
+		}
+		equipo.agregarTarea(superTarea)
+		assert.that(equipo.leGustaHacerLaTarea(superTarea))
+	}
+
+	test "Puedo obtener el nombre de quienes hicieron tareas de más de una cantidad de puntos" {
+		const tarea = new Tarea(descripcion = "Test", duracionEstimada = 100, duracionFinal = 1, esAlExterior = true, fechaLimite = new Date())
+		tarea.agregarRecompensa(queSeaAfuera)
+		tarea.agregarRecompensa(microManagement)
+		tarea.participantes(#{ jim, dwight, pam, michael })
+		jim.agregarTarea(tarea)
+		dwight.agregarTarea(tarea)
+		equipo.agregarTarea(tarea)
+		equipo.involucrados(#{ jim, dwight, pam, michael })
+		const nombres = #{ jim.nombre(), dwight.nombre() }
+		assert.equals(nombres, equipo.nombresDeLosQueHicieronTareasConMuchosPuntos().asSet())
+	}
+
+}
+

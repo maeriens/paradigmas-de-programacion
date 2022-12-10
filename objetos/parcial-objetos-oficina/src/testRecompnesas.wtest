@@ -1,0 +1,83 @@
+import recompensas.*
+
+const hoy = new Date()
+
+describe "Tests de Recompensas" {
+
+	method tareaConTiempo(estimado, final) = object {
+		method duracionEstimada() = estimado
+		method duracionFinal() = final
+	}
+
+	test "Recompensa al exterior es correcta" {
+		const afuera = object {
+			method esAlExterior() = true
+		}
+		assert.equals(50, queSeaAfuera.puntaje(afuera))
+	}
+
+	test "Recompensa no al exterior es correcta" {
+		const afuera = object {
+			method esAlExterior() = false
+		}
+		assert.equals(0, queSeaAfuera.puntaje(afuera))
+	}
+
+	test "Recompensa por terminar el mismo dia es correcta" {
+		const tarea = object {
+			const property fechaLimite = hoy
+			const property fechaFinalizacion = hoy
+			const property estaFinalizada = true
+		}
+		assert.equals(0, dependeLaFecha.puntaje(tarea))
+	}
+
+	test "Recompensa por que terminar luego de su fecha limite es correcta" {
+		const tarea = object {
+			const property fechaLimite = hoy.minusDays(1)
+			const property fechaFinalizacion = hoy
+			const property estaFinalizada = true
+		}
+		assert.equals(0, dependeLaFecha.puntaje(tarea))
+	}
+
+	test "Recompensa por termina con anticipacion es correcta" {
+		const tarea = object {
+			const property fechaLimite = hoy
+			const property fechaFinalizacion = hoy.minusDays(1)
+			const property estaFinalizada = true
+		}
+		assert.equals(30, dependeLaFecha.puntaje(tarea))
+	}
+
+	test "Recompensa por superar el termino de cohesion es correcta" {
+		const tarea = object {
+			method participantes() = #{ 1, 2, 3, 4 }
+		}
+		assert.equals(20, cohesion.puntaje(tarea))
+	}
+
+	test "Recompensa por no superar el termino de cohesion es correcta" {
+		const tarea = object {
+			method participantes() = #{ 2 }
+		}
+		assert.equals(10, cohesion.puntaje(tarea))
+	}
+
+	test "Recompensa por tardar menos de lo estimado es correcta" {
+		const tarea = self.tareaConTiempo(100, 50)
+		assert.equals(5 * 50, microManagement.puntaje(tarea))
+	}
+
+	test "Recompensa por tardar lo estimado es correcta" {
+		const tarea = self.tareaConTiempo(100, 100)
+		assert.equals(0, microManagement.puntaje(tarea))
+	}
+
+	test "Recompensa por tardar más de lo estimado es correcta" {
+		const tarea = self.tareaConTiempo(50, 100)
+		assert.equals(0, microManagement.puntaje(tarea))
+	}
+
+}
+
